@@ -1,0 +1,537 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>读取Excel如何使用Validator进行校验,批量处理数据 | milo&#39;world</title>
+<link rel="shortcut icon" href="https://milo-xiaomeng.github.io/favicon.ico?v=1678620972883">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://milo-xiaomeng.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="读取Excel如何使用Validator进行校验,批量处理数据 | milo&#39;world - Atom Feed" href="https://milo-xiaomeng.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J5XFYKKCW2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J5XFYKKCW2');
+</script>
+
+
+    <meta name="description" content="EasyExcel读取文件如何使用Validator进行校验
+我们通常使用EasyExcel读取数据时,需要写大量的if-else或者断言来确保excel中的数据格式以及内容是否符合我们的需要.而EasyExcel目前尚不支持Validat..." />
+    <meta name="keywords" content="EasyExcel,Excel,Validator" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://milo-xiaomeng.github.io">
+  <img class="avatar" src="https://milo-xiaomeng.github.io/images/avatar.png?v=1678620972883" alt="">
+  </a>
+  <h1 class="site-title">
+    milo&#39;world
+  </h1>
+  <p class="site-description">
+    <a href="https://github.com/milo-xiaomeng/milo-xiaomeng.github.io="_blank">mpcloud</a>
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/milo-xiaomeng" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              读取Excel如何使用Validator进行校验,批量处理数据
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-03-12
+              </span>
+              <span>
+                9 min read
+              </span>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/VDF9Qddt1/" class="post-tag">
+                  # EasyExcel
+                </a>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/jKhkP2zNcj/" class="post-tag">
+                  # Excel
+                </a>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/odJsMIB4Sa/" class="post-tag">
+                  # Validator
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/049346ebdc7b4e8790d2abd2c30c6b37~tplv-k3u1fbpfcp-zoom-crop-mark:1512:1512:1512:851.awebp?" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="easyexcel读取文件如何使用validator进行校验"><code>EasyExcel</code>读取文件如何使用<code>Validator</code>进行校验</h1>
+<p>我们通常使用<code>EasyExcel</code>读取数据时,需要写大量的<code>if-else</code>或者断言来确保excel中的数据格式以及内容是否符合我们的需要.<strong>而EasyExcel目前尚不支持Validator的校验</strong>,(<a href="https://github.com/alibaba/easyexcel/issues/2250">我已经提了好久的issues,一直没加这个功能</a>) https://github.com/alibaba/easyexcel/issues/2250</p>
+<p>所以本次是通过<code>ReadListener</code>来实现通过<code>Validator</code>进行校验数据,批量处理数据,返回错误行数</p>
+<h2 id="基础环境">基础环境</h2>
+<ul>
+<li><code>jdk17</code></li>
+<li><code>maven3.6+</code></li>
+<li><code>springboot3.0+|springboot2.0+</code></li>
+<li><code>easy-excel:3.2.0</code></li>
+</ul>
+<h2 id="依赖">依赖</h2>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-validation&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;easyexcel&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="自定义数据处理listener">自定义数据处理<code>Listener</code></h2>
+<p>通常我们使用<code>EasyExcel</code>读取数据时,都需要自定义一 个<code>ReadListener</code></p>
+<p>当<code>EasyExcel</code>读取到数据的时候,会调用<code>invoke</code>方法，读取完成之后会调用<code>doAfterAllAnalysed</code>方法</p>
+<p>我们具体的实现就是当<code>EasyExcel</code>调用<code>invoke</code>方法时,此时将得到的数据通过<code>Validator</code>进行校验完成之后,然后统一汇总然后再去处理(比如插入mysql等操作)</p>
+<p>如果读校验出现异常,将具体错误的数据格的行与列返回给前端,让用户重新编辑再次上传</p>
+<h2 id="具体实现">具体实现</h2>
+<pre><code>import com.alibaba.excel.context.AnalysisContext;
+import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.metadata.Head;
+import com.alibaba.excel.util.ListUtils;
+import com.github.mpcloud.framework.core.consts.SuppressWarningsName;
+import com.github.mpcloud.framework.core.utils.excel.exception.ExcelDataValidException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.groups.Default;
+import org.hibernate.validator.HibernateValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.function.Consumer;
+
+/**
+ * The type Abstract valid listener.
+ *
+ * @param &lt;T&gt; the type parameter
+ * @author : Milo
+ */
+@SuppressWarnings(SuppressWarningsName.UNUSED)
+public class AnalysisValidReadListener&lt;T&gt; extends AnalysisEventListener&lt;T&gt; {
+    private static final Logger log = LoggerFactory.getLogger(AnalysisValidReadListener.class);
+
+    private final Integer batch;
+    private final Consumer&lt;List&lt;T&gt;&gt; consumer;
+    private final List&lt;T&gt; buffer;
+    private final Validator validator;
+    private Map&lt;String, Integer&gt; fieldColumnMapping;
+
+    /**
+     * Instantiates a new Abstract valid listener.
+     */
+    public AnalysisValidReadListener(final Consumer&lt;List&lt;T&gt;&gt; consumer) {
+        this(500, consumer);
+    }
+
+    /**
+     * Instantiates a new Jdbc event listener.
+     *
+     * @param batch the batch
+     */
+    public AnalysisValidReadListener(final Integer batch, final Consumer&lt;List&lt;T&gt;&gt; consumer) {
+        this(batch, consumer, Validation.byProvider(HibernateValidator.class)
+                .configure()
+                .failFast(false)
+                .buildValidatorFactory()
+                .getValidator());
+    }
+
+    /**
+     * Instantiates a new Jdbc event listener.
+     *
+     * @param batch     the batch
+     * @param validator the validator
+     */
+    public AnalysisValidReadListener(final Integer batch, final Consumer&lt;List&lt;T&gt;&gt; consumer, final Validator validator) {
+        this.buffer = ListUtils.newArrayListWithExpectedSize(batch);
+        this.batch = batch;
+        this.validator = validator;
+        this.consumer = consumer;
+    }
+
+    @Override
+    public void invoke(final T data, final AnalysisContext context) {
+        this.validate(data, context);
+        this.buffer.add(data);
+        if (this.buffer.size() &gt;= this.batch) {
+            this.consumer.accept(this.buffer);
+            this.buffer.clear();
+        }
+    }
+
+    @Override
+    public void doAfterAllAnalysed(final AnalysisContext context) {
+        if (!this.buffer.isEmpty()) {
+            this.consumer.accept(this.buffer);
+            this.buffer.clear();
+        }
+    }
+
+    /**
+     * Valid.
+     *
+     * @param data    the data
+     * @param context the context
+     */
+    protected final void validate(final T data, final AnalysisContext context) {
+        final Optional&lt;ConstraintViolation&lt;T&gt;&gt; violationOptional = this.validator.validate(data, Default.class).stream().findFirst();
+        if (violationOptional.isEmpty()) {
+            return;
+        }
+        final ConstraintViolation&lt;T&gt; violation = violationOptional.get();
+        final String field = violation.getPropertyPath().toString();
+        final String message = violation.getMessage();
+        final Object value = violation.getInvalidValue();
+        final Integer rowIndex = context.readRowHolder().getRowIndex();
+        final Integer columnIndex = this.getColumnIndex(field, context);
+        if (log.isWarnEnabled()) {
+            log.warn(&quot;Validate field:[{}],message:[{}],value:[{}]&quot;, field, message, value);
+        }
+        throw new ExcelDataValidException(rowIndex, columnIndex, message);
+    }
+
+    /**
+     * 听过属性从context获取列号
+     * @param field 属性名称
+     * @param context excel上下文
+     * @return 列号
+     */
+    private Integer getColumnIndex(final String field, final AnalysisContext context) {
+        if (Objects.nonNull(this.fieldColumnMapping)) {
+            return this.fieldColumnMapping.get(field);
+        }
+        synchronized (this) {
+            if (Objects.nonNull(this.fieldColumnMapping)) {
+                return this.fieldColumnMapping.get(field);
+            }
+            this.fieldColumnMapping = new HashMap&lt;&gt;(16);
+            final Map&lt;Integer, Head&gt; excelFileHead = context.readSheetHolder().excelReadHeadProperty().getHeadMap();
+            for (final Map.Entry&lt;Integer, Head&gt; entry : excelFileHead.entrySet()) {
+                this.fieldColumnMapping.put(entry.getValue().getFieldName(), entry.getKey());
+            }
+            return this.fieldColumnMapping.get(field);
+        }
+    }
+}
+</code></pre>
+<h2 id="具体使用">具体使用</h2>
+<p>目前就是使用自定义的Listener去读取Excel文件<br>
+具体代码</p>
+<h3 id="读取实体">读取实体</h3>
+<pre><code>
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.StringJoiner;
+
+/**
+ * @author : Milo
+ * @description :
+ */
+public class Student implements Serializable {
+    @NotEmpty
+    private String username;
+    @NotNull
+    private Integer age;
+    @Email
+    private String email;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Student student = (Student) o;
+        return Objects.equals(getUsername(), student.getUsername()) &amp;&amp; Objects.equals(getAge(), student.getAge()) &amp;&amp; Objects.equals(getEmail(), student.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUsername(), getAge(), getEmail());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(&quot;, &quot;, Student.class.getSimpleName() + &quot;[&quot;, &quot;]&quot;)
+                .add(&quot;username='&quot; + username + &quot;'&quot;)
+                .add(&quot;age=&quot; + age)
+                .add(&quot;email='&quot; + email + &quot;'&quot;)
+                .toString();
+    }
+}
+</code></pre>
+<h3 id="读取操作">读取操作</h3>
+<p><strong>注意:我这里的<code>ReadMeta</code>,<code>ReadResult</code>,是自定义的，这个可以根据你自己需要去实现</strong><br>
+<code>ReadMeta</code>里面主要包含了一些数据,如数据流,实体映射的Excel类型,Excel密码(直接传入EasyExcelFactory也是可以的)</p>
+<pre><code>
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.ExcelReader;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.event.AnalysisEventListener;
+import com.alibaba.excel.exception.ExcelDataConvertException;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.github.mpcloud.framework.core.consts.Constant;
+import com.github.mpcloud.framework.core.consts.SuppressWarningsName;
+import com.github.mpcloud.framework.core.utils.excel.model.ReadMeta;
+import com.github.mpcloud.framework.core.utils.excel.model.ReadResult;
+import com.github.mpcloud.framework.core.utils.excel.model.WriteMeta;
+import com.github.mpcloud.framework.core.utils.http.HttpMediaType;
+import com.github.mpcloud.framework.core.utils.list.CollectionUtil;
+import com.github.mpcloud.framework.core.utils.math.MathUtils;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * The type Excel util.
+ *
+ * @author : Milo
+ */
+@SuppressWarnings(SuppressWarningsName.UNUSED)
+public class ExcelUtil {
+    private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
+
+    private ExcelUtil() {
+    }
+
+    /**
+     * Read excel read result.
+     *
+     * @param &lt;T&gt;      the type parameter
+     * @param meta     the meta {@link ReadMeta &lt;T&gt;}
+     * @param listener the listener {@link AnalysisEventListener}
+     * @return the read result
+     */
+    public static &lt;T extends Serializable&gt; ReadResult readExcel(final ReadMeta&lt;T&gt; meta, final AnalysisEventListener&lt;T&gt; listener) {
+        ExcelReader reader = null;
+        final ReadResult result = new ReadResult(Boolean.TRUE);
+        try {
+            reader = EasyExcelFactory.read(meta.getExcelStream(), meta.getClazz(), listener)
+                    .headRowNumber(meta.getHeadRowNumber())
+                    .password(meta.getPassword())
+                    .ignoreEmptyRow(Boolean.TRUE)
+                    .autoCloseStream(Boolean.TRUE)
+                    .build();
+            reader.readAll();
+        } catch (final ExcelDataConvertException ex) {
+            result.setSuccess(Boolean.FALSE);
+            result.setFailMessage(ex.getRowIndex(), ex.getColumnIndex(), ex.getMessage());
+            log.error(result.getMessage(), ex.getCause());
+        } catch (final Exception ex) {
+            result.setSuccess(Boolean.FALSE);
+        } finally {
+        Optional.ofNullable(reader).ifPresent(ExcelReader::finish);
+        }
+        return result;
+    }
+}
+</code></pre>
+<h3 id="使用">使用</h3>
+<pre><code>public static void main(String[] args) throws FileNotFoundException {
+    ReadMeta&lt;Student&gt; readMeta = ReadMeta.&lt;Student&gt;builder().clazz(Student.class).excelStream(new FileInputStream(&quot;&quot;)).build();
+    ExcelUtil.readExcel(readMeta, new AnalysisValidReadListener&lt;&gt;(500, demos -&gt; {
+        // insert batch 
+        // 这里标识每读取到500条数据进行打印
+        // 生产中可以换成500条数据进行数据库插入
+        System.out.println(demos);
+    }));
+}
+</code></pre>
+<h1 id="具体代码地址">具体代码地址</h1>
+<p><a href="https://gitee.com/moil-xm/mpcloud/tree/develop_milo/framework/framework-core/src/main/java/com/github/mpcloud/framework/core/utils/excel">gitee地址</a></p>
+<p><a href="https://juejin.cn/post/7209547043936600123">掘金地址</a></p>
+<p><a href="https://blog.csdn.net/Memory_loss/article/details/129479728?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22129479728%22%2C%22source%22%3A%22Memory_loss%22%7D">CSDN地址</a></p>
+<p><a href="https://www.bilibili.com/video/BV1GY4y197BS/?vd_source=023665d200102cb2378efb7c5487f480">B站地址</a></p>
+<p><a href="https://milo-xiaomeng.github.io/post/du-qu-excel-ru-he-shi-yong-validator-jin-xing-xiao-yan-pi-liang-chu-li-shu-ju/">我的博客</a></p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#easyexcel%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8validator%E8%BF%9B%E8%A1%8C%E6%A0%A1%E9%AA%8C"><code>EasyExcel</code>读取文件如何使用<code>Validator</code>进行校验</a>
+<ul>
+<li><a href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83">基础环境</a></li>
+<li><a href="#%E4%BE%9D%E8%B5%96">依赖</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86listener">自定义数据处理<code>Listener</code></a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0">具体实现</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E4%BD%BF%E7%94%A8">具体使用</a>
+<ul>
+<li><a href="#%E8%AF%BB%E5%8F%96%E5%AE%9E%E4%BD%93">读取实体</a></li>
+<li><a href="#%E8%AF%BB%E5%8F%96%E6%93%8D%E4%BD%9C">读取操作</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8">使用</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%85%B7%E4%BD%93%E4%BB%A3%E7%A0%81%E5%9C%B0%E5%9D%80">具体代码地址</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://milo-xiaomeng.github.io/post/springcloudgateway30-zheng-he-springdoc20knife4j40/">
+              <h3 class="post-title">
+                SpringBoot3使用Gateway聚合Springdoc+Knife4j
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  <a href="https://github.com/milo-xiaomeng/milo-xiaomeng.github.io="_blank">mpcloud</a>
+  <a class="rss" href="https://milo-xiaomeng.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

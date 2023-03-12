@@ -1,0 +1,742 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SpringBoot3使用Gateway聚合Springdoc+Knife4j | milo&#39;world</title>
+<link rel="shortcut icon" href="https://milo-xiaomeng.github.io/favicon.ico?v=1678620972883">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://milo-xiaomeng.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="SpringBoot3使用Gateway聚合Springdoc+Knife4j | milo&#39;world - Atom Feed" href="https://milo-xiaomeng.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J5XFYKKCW2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J5XFYKKCW2');
+</script>
+
+
+    <meta name="description" content="SpringBoot3使用Gateway聚合Springdoc+Knife4j
+前言
+基础环境
+将所有依赖集成好作为一个本地包供其他项目使用
+
+jdk17
+maven3.6+
+springboot3.0
+springcloud:2022.0..." />
+    <meta name="keywords" content="springboot3.0,springdoc,gateway,knife4j" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://milo-xiaomeng.github.io">
+  <img class="avatar" src="https://milo-xiaomeng.github.io/images/avatar.png?v=1678620972883" alt="">
+  </a>
+  <h1 class="site-title">
+    milo&#39;world
+  </h1>
+  <p class="site-description">
+    <a href="https://github.com/milo-xiaomeng/milo-xiaomeng.github.io="_blank">mpcloud</a>
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/milo-xiaomeng" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              SpringBoot3使用Gateway聚合Springdoc+Knife4j
+            </h2>
+            <div class="post-info">
+              <span>
+                2023-02-17
+              </span>
+              <span>
+                12 min read
+              </span>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/QJvRmwnFk/" class="post-tag">
+                  # springboot3.0
+                </a>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/eOERiqbtI/" class="post-tag">
+                  # springdoc
+                </a>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/zNIQq4qoS/" class="post-tag">
+                  # gateway
+                </a>
+              
+                <a href="https://milo-xiaomeng.github.io/tag/S-sHNEYYT/" class="post-tag">
+                  # knife4j
+                </a>
+              
+            </div>
+            
+              <img class="post-feature-image" src="https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4704bf435ed84db2abd1acade5886e1a~tplv-k3u1fbpfcp-zoom-crop-mark:1512:1512:1512:851.awebp" alt="">
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="springboot3使用gateway聚合springdocknife4j">SpringBoot3使用Gateway聚合Springdoc+Knife4j</h1>
+<h2 id="前言">前言</h2>
+<h3 id="基础环境">基础环境</h3>
+<p>将所有依赖集成好作为一个本地包供其他项目使用</p>
+<ul>
+<li>jdk17</li>
+<li>maven3.6+</li>
+<li>springboot3.0</li>
+<li>springcloud:2022.0.1</li>
+<li>springcloud-alibaba:1.8.1-2022.0.0-R<br>
+##具包(framework-document)</li>
+</ul>
+<h3 id="依赖">依赖</h3>
+<pre><code class="language-xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springdoc&lt;/groupId&gt;
+        &lt;artifactId&gt;springdoc-openapi-starter-webmvc-api&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springdoc&lt;/groupId&gt;
+        &lt;artifactId&gt;springdoc-openapi-starter-webflux-api&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.nacos&lt;/groupId&gt;
+        &lt;artifactId&gt;nacos-client&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h3 id="代码">代码</h3>
+<h4 id="文档信息properties">文档信息properties</h4>
+<pre><code class="language-java">import org.springframework.boot.context.properties.ConfigurationProperties;
+
+/**
+ * The type Swagger properties.
+ *
+ * @author : Milo
+ */
+@ConfigurationProperties(&quot;springdoc.info&quot;)
+public class DocumentInfoProperties {
+    /**
+     * 文档标题
+     */
+    private String title;
+    /**
+     * 文档描述
+     */
+    private String description;
+    /**
+     * 项目version
+     */
+    private String projectVersion;
+    /**
+     * 许可证
+     */
+    private String license;
+    /**
+     * 许可证URL
+     */
+    private String licenseUrl;
+    /**
+     * api 前缀
+     */
+    private String apiPrefix;
+    /**
+     * 项目负责人信息
+     */
+    private Contact contact = new Contact();
+
+   /*省略get,set*/
+
+    public static class Contact {
+        /**
+         * 联系人
+         **/
+        private String name;
+        /**
+         * 联系人url
+         **/
+        private String url;
+        /**
+         * 联系人email
+         **/
+        private String email;
+
+        /*省略get,set*/
+    }
+}
+</code></pre>
+<h4 id="文档信息configuration">文档信息Configuration</h4>
+<pre><code class="language-java">import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author milo
+ */
+@Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(DocumentInfoProperties.class)
+@ConditionalOnProperty(name = &quot;springdoc.api-docs.enabled&quot;, havingValue = &quot;true&quot;)
+@ConditionalOnWebApplication
+public class DocumentConfiguration {
+    @Bean
+    public OpenAPI openApi(final DocumentInfoProperties docInfo) {
+        return new OpenAPI().info(new Info()
+            .title(docInfo.getTitle())
+            .description(docInfo.getDescription())
+            .version(docInfo.getProjectVersion())
+            .contact(new Contact().name(docInfo.getContact().getName()).email(docInfo.getContact().getEmail()).url(docInfo.getContact().getUrl()))
+            .license(new License().name(docInfo.getLicense()).url(docInfo.getLicenseUrl()))
+        );
+    }
+}
+</code></pre>
+<h3 id="监听服务通过服务id创建group">监听服务,通过服务ID创建Group</h3>
+<h4 id="服务节点变动事件">服务节点变动事件</h4>
+<pre><code>import org.springframework.context.ApplicationEvent;
+
+/**
+ * @author : Milo
+ * 服务节点变动事件
+ */
+public class ServiceChangeEvent extends ApplicationEvent {
+    public ServiceChangeEvent(Object source) {
+        super(source);
+    }
+}
+</code></pre>
+<h4 id="nacos监听服务上下线">Nacos监听服务上下线</h4>
+<p>如果使用的其他的注册中心,主动去监听服务上下线,如果监听到了,直接发布ServiceChangeEvent</p>
+<pre><code>import com.alibaba.nacos.client.naming.event.InstancesChangeEvent;
+import com.alibaba.nacos.common.notify.Event;
+import com.alibaba.nacos.common.notify.NotifyCenter;
+import com.alibaba.nacos.common.notify.listener.Subscriber;
+import com.github.mpcloud.document.event.ServiceChangeEvent;
+import com.github.mpcloud.framework.core.utils.spring.SpringContextHolder;
+import org.springframework.beans.factory.InitializingBean;
+
+/**
+ * @author : Milo
+ */
+public class NacosServiceListener extends Subscriber&lt;InstancesChangeEvent&gt; implements InitializingBean {
+    @Override
+    public void onEvent(InstancesChangeEvent ignored) {
+        // 这里可以用org.springframework.context.ApplicationContext.publishEvent替代
+        SpringContextHolder.publishEvent(new ServiceChangeEvent(this));
+    }
+
+    @Override
+    public Class&lt;? extends Event&gt; subscribeType() {
+        return InstancesChangeEvent.class;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        NotifyCenter.registerSubscriber(this);
+    }
+}
+</code></pre>
+<h4 id="网关与springdoc整合的配置类">网关与SpringDoc整合的配置类</h4>
+<pre><code>import com.alibaba.nacos.client.naming.event.InstancesChangeEvent;
+import com.github.mpcloud.document.event.ServiceChangeEvent;
+import com.github.mpcloud.document.listener.NacosServiceListener;
+import com.github.mpcloud.framework.core.consts.Constant;
+import com.github.mpcloud.framework.core.utils.spring.SpringContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.properties.SwaggerUiConfigParameters;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.serviceregistry.Registration;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+
+import java.util.Set;
+
+import static org.springdoc.core.utils.Constants.SPRINGDOC_ENABLED;
+import static org.springdoc.core.utils.Constants.SPRINGDOC_SWAGGER_UI_ENABLED;
+
+/**
+ * @author : Milo
+ */
+@Configuration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+@ConditionalOnProperty(name = { SPRINGDOC_ENABLED, SPRINGDOC_SWAGGER_UI_ENABLED }, matchIfMissing = true, havingValue = &quot;true&quot;)
+public class GatewayRouterGroupProviderConfiguration {
+    public static final String PEN_API_ROUTE_NAME = &quot;open-api-route&quot;;
+    private static final Logger log = LoggerFactory.getLogger(GatewayRouterGroupProviderConfiguration.class);
+    private final ReactiveDiscoveryClient discoveryClient;
+    private final Registration registration;
+    private final SpringDocConfigProperties springDocConfigProperties;
+    private final SwaggerUiConfigParameters swaggerUiConfigParameters;
+
+    public GatewayRouterGroupProviderConfiguration(ReactiveDiscoveryClient discoveryClient, final Registration registration, SpringDocConfigProperties springDocConfigProperties, SwaggerUiConfigParameters swaggerUiConfigParameters) {
+        this.discoveryClient = discoveryClient;
+        this.registration = registration;
+        this.springDocConfigProperties = springDocConfigProperties;
+        this.swaggerUiConfigParameters = swaggerUiConfigParameters;
+    }
+
+    /**
+     * openapi 路由(重写服务名所在位置)
+     *
+     * @param builder 路由构造器
+     *
+     * @return 路由
+     */
+    @Bean
+    public RouteLocator openApiRouteLocator(final RouteLocatorBuilder builder) {
+        return builder.routes()
+            .route(PEN_API_ROUTE_NAME, route -&gt; route
+                .path(this.springDocConfigProperties.getApiDocs().getPath() + &quot;/**&quot;)
+                .filters(filter -&gt; filter.rewritePath(this.springDocConfigProperties.getApiDocs().getPath() + &quot;/(?&lt;segment&gt;.*)&quot;, &quot;/$\{segment}&quot; + this.springDocConfigProperties.getApiDocs().getPath()))
+                .uri(Constant.HTTP_PREFIX + &quot;localhost:&quot; + SpringContextHolder.getServerPort()))
+            .build();
+    }
+
+    /**
+     * 网关当前路由 (去掉服务名)
+     *
+     * @param builder 路由构造器
+     *
+     * @return 路由
+     */
+    @Bean
+    public RouteLocator registrationRouteLocator(final RouteLocatorBuilder builder) {
+        return builder.routes()
+            .route(this.registration.getServiceId(), route -&gt;
+                route.path(&quot;/&quot; + this.registration.getServiceId() + &quot;/**&quot;)
+                    .filters(filter -&gt; filter.rewritePath(&quot;/&quot; + this.registration.getServiceId() + &quot;/(?&lt;segment&gt;.*)&quot;, &quot;/$\{segment}&quot;))
+                    .uri(Constant.HTTP_PREFIX + &quot;localhost:&quot; + SpringContextHolder.getServerPort()))
+            .build();
+    }
+
+    /**
+     * nacos服务节点变动监听器
+     *
+     * @return NacosServiceListener
+     */
+    @Bean
+    @ConditionalOnClass(InstancesChangeEvent.class)
+    public NacosServiceListener nacosServiceListener() {
+        return new NacosServiceListener();
+    }
+
+    /**
+     * 目前有以下三种方式。比较推荐1和3,这两种方式 当前采用的是方式1
+     * 1. 通过注册中心获取到组名(暂时没有从 spring cloud 里面得到监听服务上下线的办法)
+     * 优点: 获取到准确的服务名
+     * 缺点: 强依赖注册中心,需要对每个注册中心分别实现监听器
+     * 2. 通过监听RefreshRoutesEvent获取到所有路由后获取组名
+     * 优点: 不强依赖注册中心
+     * 缺点: 获取服务名没有一种很友好的方式
+     * 3. 通过定时任务每隔段时间去调用当前方法
+     * 优点：获取到准确的服务名,不强依赖注册中心
+     * 缺点：需要开辟一个线程池
+     */
+    @EventListener(classes = { ApplicationReadyEvent.class, ServiceChangeEvent.class })
+    public synchronized void discover() {
+        discoveryClient.getServices()
+            .flatMap(discoveryClient::getInstances)
+            .map(instance -&gt; {
+                final AbstractSwaggerUiConfigProperties.SwaggerUrl swaggerUrl = new AbstractSwaggerUiConfigProperties.SwaggerUrl();
+                swaggerUrl.setName(instance.getServiceId());
+                swaggerUrl.setDisplayName(instance.getServiceId());
+                swaggerUrl.setUrl( &quot;/&quot; + instance.getServiceId() + this.springDocConfigProperties.getApiDocs().getPath());
+                return swaggerUrl;
+            }).subscribe(swaggerUrl -&gt; {
+                Set&lt;AbstractSwaggerUiConfigProperties.SwaggerUrl&gt; originalSwaggerUrls = this.swaggerUiConfigParameters.getUrls();
+                originalSwaggerUrls.removeIf(originalSwaggerUrl -&gt; originalSwaggerUrl.getName().equals(swaggerUrl.getName()));
+                originalSwaggerUrls.add(swaggerUrl);
+            }, ex -&gt; log.error(&quot;Listener swagger service event error.&quot;, ex));
+    }
+
+}
+</code></pre>
+<h2 id="使用工具包">使用工具包</h2>
+<h3 id="gateway">gateway</h3>
+<h4 id="依赖-2">依赖</h4>
+<pre><code>&lt;dependencies&gt;
+    &lt;!--上面的步骤所构建的包(这个是我本地的,请替换为自己写的)--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.github.mpcloud&lt;/groupId&gt;
+        &lt;artifactId&gt;framework-document&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-loadbalancer&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.github.ben-manes.caffeine&lt;/groupId&gt;
+        &lt;artifactId&gt;caffeine&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.nacos&lt;/groupId&gt;
+        &lt;artifactId&gt;nacos-client&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-bootstrap&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springdoc&lt;/groupId&gt;
+        &lt;artifactId&gt;springdoc-openapi-starter-webflux-ui&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.github.xiaoymin&lt;/groupId&gt;
+        &lt;artifactId&gt;knife4j-openapi3-ui&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h4 id="配置">配置</h4>
+<pre><code>server:
+  port: 8080
+spring:
+  application:
+    name: mpcloud-gateway
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      discovery:
+        server-addr: localhost:8848
+        namespace: mpcloud
+        cluster-name: shanghai
+        heart-beat-timeout: 40000
+        heart-beat-interval: 20000
+        ip-delete-timeout: 80000
+      config:
+        server-addr: localhost:8848
+        namespace: mpcloud
+        timeout: 3000
+        file-extension: yml
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedHeaders: '*'
+            allowedMethods: '*'
+            allowedOrigins: '*'
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 60s
+  main:
+    banner-mode: off
+  webflux:
+    multipart:
+      file-storage-directory: /tmp
+      max-in-memory-size: 12MB
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+      date: yyyy-MM-dd
+      time: HH:mm:ss
+logging:
+  file:
+    path: ./logs
+springdoc:
+  api-docs:
+    enabled: true
+    groups:
+      enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+  info:
+    title: 网关Api文档
+    description: 网关Api文档
+    project-version: 0.0.1
+    license: https://milo-xiaomeng.github.io
+    license-url: https://milo-xiaomeng.github.io
+    contact:
+      name: milo
+      url: http://localhost:8080
+      email: milo.xiaomeng@gmail.com
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+</code></pre>
+<h3 id="web服务中使用">web服务中使用</h3>
+<h4 id="依赖-3">依赖</h4>
+<pre><code>dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba.nacos&lt;/groupId&gt;
+        &lt;artifactId&gt;nacos-client&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-cloud-starter-bootstrap&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!--上面的步骤所构建的包(这个是我本地的,请替换为自己写的)--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.github.mpcloud&lt;/groupId&gt;
+        &lt;artifactId&gt;framework-document&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springdoc&lt;/groupId&gt;
+        &lt;artifactId&gt;springdoc-openapi-starter-webmvc-api&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h4 id="配置-2">配置</h4>
+<pre><code>server:
+  port: 8083
+spring:
+  application:
+    name: mpcloud-monitoring
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      discovery:
+        server-addr: localhost:8848
+        namespace: mpcloud
+        cluster-name: shanghai
+      config:
+        server-addr: localhost:8848
+        namespace: mpcloud
+        timeout: 3000
+        file-extension: yml
+springdoc:
+  api-docs:
+    enabled: true
+    groups:
+      enabled: true
+    path: /v3/api-docs
+  info:
+    title: 监控Api文档
+    description: 监控Api文档
+    project-version: 0.0.1
+    license: mpcloud.github.com
+    license-url: mpcloud.github.com
+    contact:
+      name: milo
+      url: http://localhost:8080
+      email: milo.xiaomeng@gmail.com
+  group-configs:
+   - pathsToMatch: /**
+     group: ${spring.application.name}
+  show-actuator: true
+</code></pre>
+<h2 id="效果">效果</h2>
+<figure data-type="image" tabindex="1"><img src="https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0c9df24bd1704f93ba7f6ca4ef2b6247~tplv-k3u1fbpfcp-watermark.image?" alt="image.png" loading="lazy"></figure>
+<h2 id="具体代码地址">具体代码地址</h2>
+<p><a href="https://gitee.com/moil-xm/mpcloud/tree/develop_milo">gitee地址</a></p>
+<p><a href="https://milo-xiaomeng.github.io/">我的博客</a></p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#springboot3%E4%BD%BF%E7%94%A8gateway%E8%81%9A%E5%90%88springdocknife4j">SpringBoot3使用Gateway聚合Springdoc+Knife4j</a>
+<ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a>
+<ul>
+<li><a href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83">基础环境</a></li>
+<li><a href="#%E4%BE%9D%E8%B5%96">依赖</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81">代码</a>
+<ul>
+<li><a href="#%E6%96%87%E6%A1%A3%E4%BF%A1%E6%81%AFproperties">文档信息properties</a></li>
+<li><a href="#%E6%96%87%E6%A1%A3%E4%BF%A1%E6%81%AFconfiguration">文档信息Configuration</a></li>
+</ul>
+</li>
+<li><a href="#%E7%9B%91%E5%90%AC%E6%9C%8D%E5%8A%A1%E9%80%9A%E8%BF%87%E6%9C%8D%E5%8A%A1id%E5%88%9B%E5%BB%BAgroup">监听服务,通过服务ID创建Group</a>
+<ul>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E8%8A%82%E7%82%B9%E5%8F%98%E5%8A%A8%E4%BA%8B%E4%BB%B6">服务节点变动事件</a></li>
+<li><a href="#nacos%E7%9B%91%E5%90%AC%E6%9C%8D%E5%8A%A1%E4%B8%8A%E4%B8%8B%E7%BA%BF">Nacos监听服务上下线</a></li>
+<li><a href="#%E7%BD%91%E5%85%B3%E4%B8%8Espringdoc%E6%95%B4%E5%90%88%E7%9A%84%E9%85%8D%E7%BD%AE%E7%B1%BB">网关与SpringDoc整合的配置类</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E5%B7%A5%E5%85%B7%E5%8C%85">使用工具包</a>
+<ul>
+<li><a href="#gateway">gateway</a>
+<ul>
+<li><a href="#%E4%BE%9D%E8%B5%96-2">依赖</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE">配置</a></li>
+</ul>
+</li>
+<li><a href="#web%E6%9C%8D%E5%8A%A1%E4%B8%AD%E4%BD%BF%E7%94%A8">web服务中使用</a>
+<ul>
+<li><a href="#%E4%BE%9D%E8%B5%96-3">依赖</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE-2">配置</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E6%95%88%E6%9E%9C">效果</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E4%BB%A3%E7%A0%81%E5%9C%B0%E5%9D%80">具体代码地址</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  <a href="https://github.com/milo-xiaomeng/milo-xiaomeng.github.io="_blank">mpcloud</a>
+  <a class="rss" href="https://milo-xiaomeng.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
